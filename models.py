@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from datetime import datetime
 from database import Base
 from sqlalchemy.orm import relationship
 
@@ -39,6 +40,11 @@ class SaleDB(Base):
     )
 
     quantity_sold = Column(Integer)
+    
+    sale_date = Column(
+    DateTime,
+    default=datetime.utcnow
+    )
     
     product = relationship(
     "ProductDB",

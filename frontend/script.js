@@ -17,7 +17,7 @@ async function addProduct() {
 
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMTQzODA4fQ.m9bErdPC5QBV0j2QKuzUo7wn4axsP96RJDzC26CJ_rM"
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMjk4NjM3fQ.ocgZoDcWYxAHBhNc02HNFaCoZPHVQWOwoQXWj6USWgc"
                     },
 
                     body: JSON.stringify({
@@ -36,6 +36,8 @@ async function addProduct() {
             document.getElementById("name").value = ""
             document.getElementById("quantity").value = ""
             loadProducts()
+            loadProductDropdown()
+            loadDeleteDropdown()
         }
 
 async function loadProducts() {
@@ -53,20 +55,20 @@ async function loadProducts() {
 
     tableBody.innerHTML = ""
 
-    data.products.forEach(product => {
+   data.products.forEach(product => {
 
-        const row =
-            document.createElement("tr")
+    const row =
+        document.createElement("tr")
 
-        row.innerHTML = `
-            <td>${product.id}</td>
-            <td>${product.name}</td>
-            <td>${product.quantity}</td>
-        `
+    row.innerHTML = `
+        <td>${product.id}</td>
+        <td>${product.name}</td>
+        <td>${product.quantity}</td>
+    `
 
-        tableBody.appendChild(row)
+    tableBody.appendChild(row)
 
-    })
+})
 }
 
 async function recordSale() {
@@ -104,6 +106,8 @@ async function recordSale() {
             document.getElementById("quantitySold").value = ""
             loadProducts()
             loadSales()
+             loadProductDropdown()
+            loadDeleteDropdown()
         }
 async function loadSales() {
 
@@ -126,15 +130,184 @@ async function loadSales() {
             document.createElement("tr")
 
         row.innerHTML = `
-            <td>${sale.id}</td>
-            <td>${sale.product_name}</td>
-            <td>${sale.quantity_sold}</td>
-        `
+    <td>${sale.id}</td>
+    <td>${sale.product_name}</td>
+    <td>${sale.quantity_sold}</td>
+    <td>${sale.sale_date}</td>
+`
 
         tableBody.appendChild(row)
 
     })
 
 }
-loadProducts()
-loadSales()
+async function searchProduct() {
+
+    const name =
+        document.getElementById("searchName").value
+
+    const response = await fetch(
+        `http://127.0.0.1:8000/search?name=${name}`
+    )
+
+    const data = await response.json()
+
+    const tableBody =
+        document.getElementById("productTableBody")
+
+    tableBody.innerHTML = ""
+
+    data.products.forEach(product => {
+
+        const row =
+            document.createElement("tr")
+
+        row.innerHTML = `
+            <td>${product.id}</td>
+            <td>${product.name}</td>
+            <td>${product.quantity}</td>
+        `
+
+        tableBody.appendChild(row)
+
+    })
+
+    document.getElementById("searchMessage").innerText =
+        `${data.products.length} product(s) found`
+}
+async function updateProduct() {
+
+    const productId =
+        document.getElementById("updateProductId").value
+
+    const productQuantity =
+        document.getElementById("updateProductQuantity").value
+
+    document.getElementById("updateMessage").innerText =
+        "Updating product..."
+
+    const response = await fetch(
+        `http://127.0.0.1:8000/products/${productId}`,
+        {
+            method: "PUT",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMjk4NjM3fQ.ocgZoDcWYxAHBhNc02HNFaCoZPHVQWOwoQXWj6USWgc"
+            },
+
+            body: JSON.stringify({
+    quantity: Number(productQuantity)
+})
+        }
+    )
+
+    const data = await response.json()
+
+    document.getElementById("updateMessage").innerText =
+        data.message
+
+    document.getElementById("updateProductQuantity").value = ""
+
+    loadProducts()
+    loadProductDropdown()
+    loadDeleteDropdown()
+}
+async function loadProductDropdown() {
+
+    const response = await fetch(
+        "http://127.0.0.1:8000/products"
+    )
+
+    const data = await response.json()
+
+    const dropdown =
+        document.getElementById("updateProductId")
+
+    dropdown.innerHTML = ""
+
+    data.products.forEach(product => {
+
+        const option =
+            document.createElement("option")
+
+        option.value = product.id
+
+        option.text =
+            `${product.name} (Stock: ${product.quantity})`
+
+        dropdown.appendChild(option)
+
+    })
+}
+async function loadDeleteDropdown() {
+
+    const response = await fetch(
+        "http://127.0.0.1:8000/products"
+    )
+
+    const data = await response.json()
+
+    const dropdown =
+        document.getElementById("deleteProductId")
+
+    dropdown.innerHTML = ""
+
+    data.products.forEach(product => {
+
+        const option =
+            document.createElement("option")
+
+        option.value = product.id
+
+        option.text =
+            `${product.name} (Stock: ${product.quantity})`
+
+        dropdown.appendChild(option)
+
+    })
+}
+async function deleteProduct() {
+
+    const productId =
+        document.getElementById("deleteProductId").value
+
+    const confirmed = confirm(
+        "Are you sure you want to delete this product?"
+    )
+
+    if (!confirmed) {
+        return
+    }
+
+    document.getElementById("deleteMessage").innerText =
+        "Deleting product..."
+
+    const response = await fetch(
+        `http://127.0.0.1:8000/products/${productId}`,
+        {
+            method: "DELETE",
+
+            headers: {
+                "Authorization":
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMjk4NjM3fQ.ocgZoDcWYxAHBhNc02HNFaCoZPHVQWOwoQXWj6USWgc"
+            }
+        }
+    )
+
+    const data = await response.json()
+
+    document.getElementById("deleteMessage").innerText =
+        data.message
+
+    loadProducts()
+    loadProductDropdown()
+    loadDeleteDropdown()
+}
+
+window.onload = function () {
+    loadProducts()
+    loadSales()
+    loadProductDropdown()
+     loadDeleteDropdown()
+}

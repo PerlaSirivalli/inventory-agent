@@ -67,6 +67,51 @@
 
     <br><br>
 
+    <h2>Search Product</h2>
+
+<input
+    type="text"
+    id="searchName"
+    placeholder="Enter product name">
+
+<button onclick="searchProduct()">
+    Search
+</button>
+
+<p id="searchMessage"></p>
+<h2>Update Product</h2>
+
+<select id="updateProductId">
+</select>
+
+<br><br>
+
+<input
+    type="number"
+    id="updateProductQuantity"
+    min="1"
+    placeholder="New Quantity">
+
+<br><br>
+
+<button onclick="updateProduct()">
+    Update Product
+</button>
+
+<p id="updateMessage"></p>
+<h2>Delete Product</h2>
+
+<select id="deleteProductId">
+</select>
+
+<br><br>
+
+<button onclick="deleteProduct()">
+    Delete Product
+</button>
+
+<p id="deleteMessage"></p>
+
     <h2>Inventory</h2>
 
     <table id="productTable">
@@ -89,8 +134,9 @@
     <thead>
         <tr>
             <th>Sale ID</th>
-            <th>Product</th>
-            <th>Quantity Sold</th>
+        <th>Product</th>
+        <th>Quantity Sold</th>
+        <th>Date</th>
         </tr>
     </thead>
 

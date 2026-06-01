@@ -16,7 +16,6 @@ class Product(BaseModel):
 
 
 class UpdateProduct(BaseModel):
-    name: str
     quantity: int
 
 
@@ -34,38 +33,42 @@ def add_product(
 
     db: Session = SessionLocal()
 
-    if product.quantity <= 0:
-        return {
-            "message": "Quantity must be greater than 0"
-        }
+    try:
 
-    existing_product = db.query(ProductDB).filter(
-        ProductDB.name == product.name
-    ).first()
+        if product.quantity <= 0:
+            return {
+                "message": "Quantity must be greater than 0"
+            }
 
-    if existing_product:
+        existing_product = db.query(ProductDB).filter(
+            ProductDB.name == product.name
+        ).first()
 
-        existing_product.quantity += product.quantity
+        if existing_product:
+
+            existing_product.quantity += product.quantity
+
+            db.commit()
+
+            return {
+                "message": "Product quantity updated"
+            }
+
+        new_product = ProductDB(
+            name=product.name,
+            quantity=product.quantity
+        )
+
+        db.add(new_product)
 
         db.commit()
 
         return {
-            "message": "Product quantity updated"
+            "message": "Product added successfully"
         }
 
-    new_product = ProductDB(
-        name=product.name,
-        quantity=product.quantity
-    )
-
-    db.add(new_product)
-
-    db.commit()
-
-    return {
-        "message": "Product added successfully"
-    }
-
+    finally:
+        db.close()
 
 # Record sale
 @router.post("/sales")
@@ -73,38 +76,47 @@ def add_sale(sale: Sale):
 
     db: Session = SessionLocal()
 
-    product = db.query(ProductDB).filter(
-        ProductDB.id == sale.product_id
-    ).first()
+    try:
 
-    if not product:
+        product = db.query(ProductDB).filter(
+            ProductDB.id == sale.product_id
+        ).first()
+
+        if not product:
+            return {
+                "message": "Product not found"
+            }
+
+        if sale.quantity_sold <= 0:
+            return {
+                "message": "Quantity sold must be greater than 0"
+            }
+
+        if sale.quantity_sold > product.quantity:
+            return {
+                "message": "Insufficient stock"
+            }
+
+        new_sale = SaleDB(
+            product_id=sale.product_id,
+            quantity_sold=sale.quantity_sold
+        )
+
+        db.add(new_sale)
+
+        product.quantity = (
+            product.quantity
+            - sale.quantity_sold
+        )
+
+        db.commit()
+
         return {
-            "message": "Product not found"
+            "message": "Sale added successfully"
         }
 
-    if sale.quantity_sold > product.quantity:
-        return {
-            "message": "Insufficient stock"
-        }
-
-    new_sale = SaleDB(
-        product_id=sale.product_id,
-        quantity_sold=sale.quantity_sold
-    )
-
-    db.add(new_sale)
-
-    product.quantity = (
-        product.quantity
-        - sale.quantity_sold
-    )
-
-    db.commit()
-
-    return {
-        "message": "Sale added successfully"
-    }
-
+    finally:
+        db.close()
 
 # Get all products
 @router.get("/products")
@@ -112,19 +124,23 @@ def get_products():
 
     db: Session = SessionLocal()
 
-    products = db.query(ProductDB).all()
+    try:
 
-    result = []
+        products = db.query(ProductDB).all()
 
-    for product in products:
-        result.append({
-            "id": product.id,
-            "name": product.name,
-            "quantity": product.quantity
-        })
+        result = []
 
-    return {"products": result}
+        for product in products:
+            result.append({
+                "id": product.id,
+                "name": product.name,
+                "quantity": product.quantity
+            })
 
+        return {"products": result}
+
+    finally:
+        db.close()
 
 # Get product by ID
 @router.get("/products/{product_id}")
@@ -132,20 +148,30 @@ def get_product_by_id(product_id: int):
 
     db: Session = SessionLocal()
 
-    product = db.query(ProductDB).filter(
-        ProductDB.id == product_id
-    ).first()
+    try:
 
-    if not product:
+        if product_id <= 0:
+            return {
+                "message": "Invalid product ID"
+            }
+
+        product = db.query(ProductDB).filter(
+            ProductDB.id == product_id
+        ).first()
+
+        if not product:
+            return {
+                "message": "Product not found"
+            }
+
         return {
-            "message": "Product not found"
+            "id": product.id,
+            "name": product.name,
+            "quantity": product.quantity
         }
 
-    return {
-        "id": product.id,
-        "name": product.name,
-        "quantity": product.quantity
-    }
+    finally:
+        db.close()
 
 
 # Search product by name
@@ -154,22 +180,26 @@ def search_product(name: str):
 
     db: Session = SessionLocal()
 
-    products = db.query(ProductDB).filter(
-        ProductDB.name == name
-    ).all()
+    try:
 
-    result = []
+        products = db.query(ProductDB).filter(
+            ProductDB.name == name
+        ).all()
 
-    for product in products:
-        result.append({
-            "id": product.id,
-            "name": product.name,
-            "quantity": product.quantity
-        })
+        result = []
 
-    return {"products": result}
+        for product in products:
+            result.append({
+                "id": product.id,
+                "name": product.name,
+                "quantity": product.quantity
+            })
 
+        return {"products": result}
 
+    finally:
+        db.close()
+        
 # Update product
 @router.put("/products/{product_id}")
 def update_product(
@@ -180,24 +210,37 @@ def update_product(
 
     db: Session = SessionLocal()
 
-    product = db.query(ProductDB).filter(
-        ProductDB.id == product_id
-    ).first()
+    try:
 
-    if not product:
+        if product_id <= 0:
+            return {
+                "message": "Invalid product ID"
+            }
+
+        if updated_product.quantity <= 0:
+            return {
+                "message": "Quantity must be greater than 0"
+            }
+
+        product = db.query(ProductDB).filter(
+            ProductDB.id == product_id
+        ).first()
+
+        if not product:
+            return {
+                "message": "Product not found"
+            }
+
+        product.quantity = updated_product.quantity
+
+        db.commit()
+
         return {
-            "message": "Product not found"
+            "message": "Product updated successfully"
         }
 
-    product.name = updated_product.name
-    product.quantity = updated_product.quantity
-
-    db.commit()
-
-    return {
-        "message": "Product updated successfully"
-    }
-
+    finally:
+        db.close()
 
 # Delete product
 @router.delete("/products/{product_id}")
@@ -208,49 +251,65 @@ def delete_product(
 
     db: Session = SessionLocal()
 
-    product = db.query(ProductDB).filter(
-        ProductDB.id == product_id
-    ).first()
+    try:
 
-    if not product:
+        if product_id <= 0:
+            return {
+                "message": "Invalid product ID"
+            }
+
+        product = db.query(ProductDB).filter(
+            ProductDB.id == product_id
+        ).first()
+
+        if not product:
+            return {
+                "message": "Product not found"
+            }
+
+        existing_sales = db.query(SaleDB).filter(
+            SaleDB.product_id == product_id
+        ).first()
+
+        if existing_sales:
+            return {
+                "message": "Cannot delete product with sales history"
+            }
+
+        db.delete(product)
+
+        db.commit()
+
         return {
-            "message": "Product not found"
+            "message": "Product deleted successfully"
         }
 
-    existing_sales = db.query(SaleDB).filter(
-        SaleDB.product_id == product_id
-    ).first()
-
-    if existing_sales:
-        return {
-            "message": "Cannot delete product with sales history"
-        }
-
-    db.delete(product)
-
-    db.commit()
-
-    return {
-        "message": "Product deleted successfully"
-    }
+    finally:
+        db.close()
 
 @router.get("/sales")
 def get_sales():
 
     db: Session = SessionLocal()
 
-    sales = db.query(SaleDB).all()
+    try:
 
-    result = []
+        sales = db.query(SaleDB).all()
 
-    for sale in sales:
+        result = []
 
-        result.append({
-            "id": sale.id,
-            "product_name": sale.product.name if sale.product else "Deleted Product",
-            "quantity_sold": sale.quantity_sold
-        })
+        for sale in sales:
 
-    return {
-        "sales": result
-    }
+            result.append({
+                "id": sale.id,
+                "product_name": sale.product.name if sale.product else "Deleted Product",
+                "quantity_sold": sale.quantity_sold,
+                "sale_date": str(sale.sale_date)
+            })
+
+        return {
+            "sales": result
+        }
+
+    finally:
+        db.close()
