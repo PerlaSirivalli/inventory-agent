@@ -1,4 +1,5 @@
-
+let allProducts = []
+let allSales = []
 async function addProduct() {
 
              document.getElementById("productMessage").innerText =
@@ -17,7 +18,7 @@ async function addProduct() {
 
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMjk4NjM3fQ.ocgZoDcWYxAHBhNc02HNFaCoZPHVQWOwoQXWj6USWgc"
+                        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMzA2MTUzfQ.cD3TYoHK5M__OQbxuazEEyBJAKiLtlGkPstt8XSpVP0"
                     },
 
                     body: JSON.stringify({
@@ -48,6 +49,12 @@ async function loadProducts() {
 
     const data = await response.json()
 
+    allProducts = data.products
+    
+    updateStats(allProducts, allSales)
+
+    updateLowStock(allProducts)
+
     console.log(data)
 
     const tableBody =
@@ -55,20 +62,20 @@ async function loadProducts() {
 
     tableBody.innerHTML = ""
 
-   data.products.forEach(product => {
+    data.products.forEach(product => {
 
-    const row =
-        document.createElement("tr")
+        const row =
+            document.createElement("tr")
 
-    row.innerHTML = `
-        <td>${product.id}</td>
-        <td>${product.name}</td>
-        <td>${product.quantity}</td>
-    `
+        row.innerHTML = `
+            <td>${product.id}</td>
+            <td>${product.name}</td>
+            <td>${product.quantity}</td>
+        `
 
-    tableBody.appendChild(row)
+        tableBody.appendChild(row)
 
-})
+    })
 }
 
 async function recordSale() {
@@ -117,6 +124,10 @@ async function loadSales() {
 
     const data = await response.json()
 
+    allSales = data.sales
+
+    updateStats(allProducts, allSales)
+
     console.log(data)
 
     const tableBody =
@@ -130,11 +141,11 @@ async function loadSales() {
             document.createElement("tr")
 
         row.innerHTML = `
-    <td>${sale.id}</td>
-    <td>${sale.product_name}</td>
-    <td>${sale.quantity_sold}</td>
-    <td>${sale.sale_date}</td>
-`
+            <td>${sale.id}</td>
+            <td>${sale.product_name}</td>
+            <td>${sale.quantity_sold}</td>
+            <td>${sale.sale_date}</td>
+        `
 
         tableBody.appendChild(row)
 
@@ -193,7 +204,7 @@ async function updateProduct() {
 
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMjk4NjM3fQ.ocgZoDcWYxAHBhNc02HNFaCoZPHVQWOwoQXWj6USWgc"
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMzA2MTUzfQ.cD3TYoHK5M__OQbxuazEEyBJAKiLtlGkPstt8XSpVP0"
             },
 
             body: JSON.stringify({
@@ -290,7 +301,7 @@ async function deleteProduct() {
 
             headers: {
                 "Authorization":
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMjk4NjM3fQ.ocgZoDcWYxAHBhNc02HNFaCoZPHVQWOwoQXWj6USWgc"
+                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJTaXJpIiwiZXhwIjoxNzgwMzA2MTUzfQ.cD3TYoHK5M__OQbxuazEEyBJAKiLtlGkPstt8XSpVP0"
             }
         }
     )
@@ -305,6 +316,61 @@ async function deleteProduct() {
     loadDeleteDropdown()
 }
 
+function updateStats(products, sales) {
+
+    document.getElementById("totalProducts").innerText =
+        products.length
+
+    let totalStock = 0
+
+    products.forEach(product => {
+        totalStock += product.quantity
+    })
+
+    document.getElementById("totalStock").innerText =
+        totalStock
+
+    let totalSales = 0
+
+    sales.forEach(sale => {
+        totalSales += sale.quantity_sold
+    })
+
+    document.getElementById("totalSales").innerText =
+        totalSales
+}
+function updateLowStock(products) {
+
+    const container =
+        document.getElementById("lowStockContainer")
+
+    container.innerHTML = ""
+
+    const lowStockProducts =
+        products.filter(product => product.quantity <= 10)
+
+    if (lowStockProducts.length === 0) {
+
+        container.innerHTML =
+            "✅ No low stock products"
+
+        return
+    }
+
+    lowStockProducts.forEach(product => {
+
+        const item =
+            document.createElement("div")
+
+        item.className = "low-stock-item"
+
+        item.innerText =
+            `${product.name}: ${product.quantity}`
+
+        container.appendChild(item)
+
+    })
+}
 window.onload = function () {
     loadProducts()
     loadSales()

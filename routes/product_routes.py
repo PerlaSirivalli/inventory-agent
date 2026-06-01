@@ -6,7 +6,7 @@ from database import SessionLocal
 from models import ProductDB, SaleDB
 
 from auth import get_current_user
-
+from datetime import timedelta
 router = APIRouter()
 
 
@@ -199,7 +199,7 @@ def search_product(name: str):
 
     finally:
         db.close()
-        
+
 # Update product
 @router.put("/products/{product_id}")
 def update_product(
@@ -287,6 +287,8 @@ def delete_product(
     finally:
         db.close()
 
+from datetime import timedelta
+
 @router.get("/sales")
 def get_sales():
 
@@ -300,11 +302,16 @@ def get_sales():
 
         for sale in sales:
 
+            ist_time = (
+                sale.sale_date
+                + timedelta(hours=5, minutes=30)
+            )
+
             result.append({
                 "id": sale.id,
                 "product_name": sale.product.name if sale.product else "Deleted Product",
                 "quantity_sold": sale.quantity_sold,
-                "sale_date": str(sale.sale_date)
+                "sale_date": ist_time.strftime("%d %b %Y, %I:%M %p")
             })
 
         return {
