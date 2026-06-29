@@ -1,9 +1,10 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+body{
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg,#EEF4FF,#DCE9FF);
+    margin: 0;
     padding: 30px;
+    min-height: 100vh;
 }
-
 .card {
     background-color: white;
     padding: 20px;
@@ -126,9 +127,6 @@ th, td {
     height: 42px;
     box-sizing: border-box;
 }
-body {
-    background: #f4f6f9;
-}
 .stat-card.products {
     border-top: 5px solid #3498db;
 }
@@ -173,4 +171,83 @@ tbody tr:nth-child(even) {
 }
 tbody tr:hover {
     background: #eaf4ff;
+}
+/* ==========================
+   Login & Signup Page
+========================== */
+
+.auth-container{
+    width: 420px;
+    margin: 80px auto;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.auth-container h1{
+    text-align: center;
+    color: #1f2937;
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+.auth-container input{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: all .25s ease;
+}
+
+.auth-container input:focus{
+    outline: none;
+    border-color: #2563EB;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+
+.auth-container button{
+    width: 100%;
+    padding: 14px;
+    margin-top: 5px;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .25s ease;
+}
+
+.auth-container button:hover{
+    background: #1D4ED8;
+}
+
+.auth-container p{
+    text-align: center;
+    margin-top: 22px;
+    font-size: 15px;
+    color: #4b5563;
+}
+
+.auth-container a{
+    color: #2563EB;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-container a:hover{
+    text-decoration: underline;
+}
+
+#message{
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 600;
 }

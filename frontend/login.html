@@ -1,38 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inventory Login</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <h2>Inventory Login</h2>
+    <div class="auth-container">
 
-    <input
-        type="text"
-        id="username"
-        placeholder="Username">
+        <h1>Inventory Login</h1>
 
-    <br><br>
+        <input
+            type="text"
+            id="username"
+            placeholder="Username"
+            autocomplete="username"
+            required>
 
-    <input
-        type="password"
-        id="password"
-        placeholder="Password">
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            required>
 
-    <br><br>
+        <button type="button" onclick="login()">
+            Login
+        </button>
 
-    <button onclick="login()">
-        Login
-    </button>
-    <p>
-    Don't have an account?
-    <a href="signup.html">
-        Signup
-    </a>
-</p>
-    <p id="message"></p>
+        <p>
+            Don't have an account?
+            <a href="signup.html">Sign Up</a>
+        </p>
+
+        <p id="message"></p>
+
+    </div>
 
     <script src="login.js"></script>
 
 </body>
+
 </html>
